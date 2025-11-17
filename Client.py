@@ -72,7 +72,8 @@ class TomTom4ClientCommand(ClientCommandProcessor):
 class KSAWContext(CommonContext):
     game = "Kirby ~ Soft & Wet"
     items_handling = 0b111
-    game_dir = "C:/Users/josht/AppData/Local/Kirby ~ Soft & Wet"
+    game_dir = os.path.join(os.path.expanduser("~"), "AppData/Local/Kirby ~ Soft & Wet")
+    print(game_dir)
     ini_file = "data1.ini"
     ini_dir = None
 
