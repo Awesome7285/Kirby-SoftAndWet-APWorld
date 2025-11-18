@@ -676,4 +676,6 @@ fish_locations = [
     "Antitoon_Caught"
 ]
 
-location_table = {name: id for id, name in enumerate(fish_locations, BASE_ID)}
+all_locations = fish_count_locations + fish_locations
+
+location_table = {name: id for id, name in enumerate(all_locations, BASE_ID)}

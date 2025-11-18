@@ -1,6 +1,6 @@
 from typing import List, Dict, Tuple
 from worlds.LauncherComponents import Component, components, Type, launch_subprocess
-from .Items import KSAWItem, all_items, item_table as item_name_to_id
+from .Items import KSAWItem, all_items, coin_items, bait_items, item_table as item_name_to_id
 from .Locations import KSAWLocation, all_locations, location_table as location_name_to_id
 from .Regions import create_regions
 from .Rules import set_rules
@@ -19,7 +19,7 @@ components.append(Component("KSAW Client", func=run_client, component_type=Type.
 
 class KSAWWorld(World):
     """ 
-    TomTom Adventures Flaming Special game description.
+    Kirby ~ Soft & Wet game description.
     """
 
     game: str = "Kirby ~ Soft & Wet"
@@ -52,8 +52,8 @@ class KSAWWorld(World):
         item_pool += [self.create_item(item) for item in all_items]
 
         # # Fill any empty locations with filler items.
-        # while len(item_pool) < len(self.multiworld.get_unfilled_locations(player=self.player)):
-        #     item_pool.append(self.create_item(filler_items[0])) # self.get_filler_item_name()
+        while len(item_pool) < len(self.multiworld.get_unfilled_locations(player=self.player)):
+            item_pool.append(self.create_item(self.random.choice(coin_items))) # self.get_filler_item_name()
 
         self.multiworld.itempool += item_pool
 

@@ -3,8 +3,8 @@ import colorama
 from collections import Counter
 
 from CommonClient import CommonContext, server_loop, gui_enabled, get_base_parser, logger, ClientStatus, ClientCommandProcessor
-from .Items import item_table, BASE_ID
-from .Locations import location_table, all_locations
+from .Items import item_table, BASE_ID, coin_items, bait_items
+from .Locations import location_table, all_locations, fish_count_locations, fish_locations
 
 
 ### INI OPENING STUFF
@@ -18,6 +18,7 @@ def clear_ini(ini_dir):
             if os.path.exists(ini_dir):
                 os.remove(ini_dir)
             config = configparser.ConfigParser()
+            config.optionxform = str
             config.add_section("Items")
             config.add_section("Locations")
             with open(ini_dir, "w") as f:
@@ -32,11 +33,13 @@ def clear_ini(ini_dir):
 
 def read_ini_section(ini_dir, section):
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read(ini_dir)
     return dict(config[section]) if section in config else {}
 
 def write_ini(ini_dir, section, key, value):
     config = configparser.ConfigParser()
+    config.optionxform = str
     if os.path.exists(ini_dir):
         config.read(ini_dir)
     if section not in config:
@@ -72,10 +75,8 @@ class TomTom4ClientCommand(ClientCommandProcessor):
 class KSAWContext(CommonContext):
     game = "Kirby ~ Soft & Wet"
     items_handling = 0b111
-    game_dir = os.path.join(os.path.expanduser("~"), "AppData/Local/Kirby ~ Soft & Wet")
-    print(game_dir)
-    ini_file = "data1.ini"
-    ini_dir = None
+    locations_dir = os.path.join(os.path.expanduser("~"), "AppData/Local/Kirby ~ Soft & Wet/data1.ini")
+    items_dir = os.path.join(os.path.expanduser("~"), "AppData/Local/Kirby ~ Soft & Wet/apdata1.ini")
 
     def __init__(self, server_address, password):
         super().__init__(server_address, password)
@@ -142,33 +143,36 @@ class KSAWContext(CommonContext):
 
             asyncio.create_task(self.check_for_locations_loop())
 
-    def update_ini_file(self) -> None:
-        """Updates the INI file directory"""
-        self.ini_dir = os.path.join(self.game_dir, self.ini_file)
-
     async def update_checked_locations(self, locations):
         """Updates the locations already completed from initial datapackage"""
         print(locations)
         for loc in locations:
-            write_ini(self.ini_dir, "Locations", str(loc-BASE_ID+1), 1)
+            write_ini(self.locations_dir, "Locations", str(loc-BASE_ID+1), 1)
     
     async def update_received_items(self, items):
         """Updates items received to the INI"""
-        new_items = [item.item-BASE_ID+1 for item in items]
+        
+
+        new_items = [self.item_ap_id_to_name[item.item] for item in items]
         received = dict(Counter(new_items))
-        for item_id, amount in received.items():
-            write_ini(self.ini_dir, "Items", str(item_id), amount)
+        for item_name, amount in received.items():
+            if item_name in bait_items.keys():
+                write_ini(self.items_dir, "baitStatus", bait_items[item_name], 1)
+            # elif item_name in coin_items:
+            #     write_ini(self.items_dir, "gameplay", "coins", item_name)
     
     async def check_for_locations_loop(self):
         """Permanent Loop that checks the users ini file for new locations to send"""
         while True:
             await asyncio.sleep(1.3)
             new_locations = []
-            game_data = read_ini_section(self.ini_dir, "gameplay")
-            fish = game_data["caughttotalfishcount"].replace('"', "")
-            print(fish)
-            if float(fish) > 14:
-                new_locations.append(1)
+            game_data = read_ini_section(self.locations_dir, "gameplay")
+            try:
+                fish = int(float(game_data["caughtTotalFishCount"].replace('"', "")))
+            except KeyError:
+                fish = 0
+            for f in range(1, fish+1):
+                new_locations.append(self.location_name_to_ap_id[f"Obtained Fish #{f}"])
 
             
             # written_locations = read_ini_section(self.ini_dir, "Locations")
@@ -194,8 +198,6 @@ def main():
         multiprocessing.freeze_support()
         ctx = KSAWContext(args.connect, args.password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="Server Loop")
-        
-        ctx.update_ini_file()
 
         if gui_enabled:
             ctx.run_gui()
