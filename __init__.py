@@ -1,6 +1,6 @@
 from typing import List, Dict, Tuple
 from worlds.LauncherComponents import Component, components, Type, launch_subprocess
-from .Items import KSAWItem, all_items, coin_items, bait_items, item_table as item_name_to_id
+from .Items import KSAWItem, all_items, coin_items, bait_items, bobber_items, hat_items, spray_items, item_table as item_name_to_id
 from .Locations import KSAWLocation, all_locations, location_table as location_name_to_id
 from .Regions import create_regions
 from .Rules import set_rules
@@ -48,8 +48,18 @@ class KSAWWorld(World):
         item_pool: List[KSAWItem] = []
         #print([i.name for i in self.multiworld.get_locations()])
 
+        # Choose random starting items
+        starting_items = []
+        starting_items.append(self.random.choice(list(bait_items.keys())))
+        starting_items.append(self.random.choice(list(bobber_items.keys())))
+        starting_items.append(self.random.choice(list(hat_items.keys())))
+        starting_items.append(self.random.choice(list(spray_items.keys())))
+        for item in starting_items:
+            self.multiworld.push_precollected(self.create_item(item))
+        
+
         # Add all items
-        item_pool += [self.create_item(item) for item in all_items]
+        item_pool += [self.create_item(item) for item in all_items if item not in starting_items]
 
         # # Fill any empty locations with filler items.
         while len(item_pool) < len(self.multiworld.get_unfilled_locations(player=self.player)):
