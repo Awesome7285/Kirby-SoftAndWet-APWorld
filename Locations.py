@@ -5,9 +5,7 @@ class KSAWLocation(Location):
     game: str = "Kirby ~ Soft & Wet"
 
 # Stage completion locations
-all_locations = [
-    "catch fish"
-]
+fish_count_locations = [f"Obtained Fish #{i}" for i in range(1, 667)]
 
 fish_locations = [
     "Blipper_Caught",
@@ -678,4 +676,4 @@ fish_locations = [
     "Antitoon_Caught"
 ]
 
-location_table = {name: id for id, name in enumerate(all_locations, BASE_ID)}
+location_table = {name: id for id, name in enumerate(fish_locations, BASE_ID)}
