@@ -131,7 +131,9 @@ spray_items = {
     "Dawn Spray Can": "kirby_Dawn_IsUnlocked",
     "Super Star Spray Can": "kirby_SuperStar_IsUnlocked",
     "Lornus Spray Can": "kirby_Lornus_IsUnlocked",
-    "ChuChu Spray Can": "kirby_ChuChu_IsUnlocked"
+    "ChuChu Spray Can": "kirby_ChuChu_IsUnlocked",
+    "Sea Breeze Spray Can": "kirby_SeaBreeze_IsUnlocked",
+    "Aege Spray Can": "kirby_Aege_IsUnlocked"
 }
 
 area_items = {
